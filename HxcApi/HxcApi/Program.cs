@@ -54,7 +54,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-var sampleTodos = new Todo[]
+var userTodos = new Todo[]
 {
     new(1, "Walk the dog"),
     new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
@@ -75,18 +75,18 @@ var organizationTodos = new Todo[]
 var apiMapGroup = app.MapGroup("api/");
 var todosApi = apiMapGroup.MapGroup("user/todos");
 
-todosApi.MapGet("/", () => sampleTodos);
+todosApi.MapGet("/", () => userTodos);
 todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
+    userTodos.FirstOrDefault(a => a.Id == id) is { } todo
         ? Results.Ok(todo)
         : Results.NotFound());
 
 var organizationTodosApi = apiMapGroup.MapGroup("organization/todos")
     .RequireAuthorization("organization");
 
-organizationTodosApi.MapGet("/", () => sampleTodos);
+organizationTodosApi.MapGet("/", () => organizationTodos);
 organizationTodosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
+    organizationTodos.FirstOrDefault(a => a.Id == id) is { } todo
         ? Results.Ok(todo)
         : Results.NotFound());
 
