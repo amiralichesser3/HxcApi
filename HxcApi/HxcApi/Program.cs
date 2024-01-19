@@ -1,13 +1,13 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
-using HxcApi.Utility;
+using Dapper;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 
+[module:DapperAot]
 
-// Set the CORECLR_GLOBAL_INVARIANT environment variable
 Environment.SetEnvironmentVariable("CORECLR_GLOBAL_INVARIANT", "1");
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -54,7 +54,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        builder => builder
+        corsPolicyBuilder => corsPolicyBuilder
             .WithOrigins("*")
             .AllowAnyMethod()
             .AllowAnyHeader());
@@ -81,11 +81,13 @@ todosApi.MapGet("/{id}", (int id) =>
         ? Results.Ok(todo)
         : Results.NotFound());
 
-var organizationTodosApi = apiMapGroup.MapGroup("organization/todos")
-    .RequireAuthorization("organization");
-
-organizationTodosApi.MapGet("/", (SqlConnection connection) =>
-    connection.GetTodoData("select * from dbo.Todos"));
+var organizationTodosApi =
+    apiMapGroup.MapGroup("organization/todos").RequireAuthorization("organization");
+organizationTodosApi.MapGet("/", async(SqlConnection connection) =>
+    await connection.QueryAsync<Todo>("""
+                                      SELECT Id, Title, DueBy, IsComplete
+                                      FROM Todos;
+                                      """));
 
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
@@ -95,6 +97,4 @@ app.Run();
 
 [JsonSerializable(typeof(IEnumerable<Todo>))]
 [JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-}
+internal partial class AppJsonSerializerContext : JsonSerializerContext;
