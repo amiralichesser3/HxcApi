@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using HxcApi.Utility;
+using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
@@ -84,15 +85,13 @@ var organizationTodosApi = apiMapGroup.MapGroup("organization/todos")
     .RequireAuthorization("organization");
 
 organizationTodosApi.MapGet("/", (SqlConnection connection) =>
-    connection.GetTodoData("select * from dbo.Todo"));
+    connection.GetTodoData("select * from dbo.Todos"));
 
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
 
 [JsonSerializable(typeof(IEnumerable<Todo>))]
 [JsonSerializable(typeof(Todo[]))]

@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using HxcCommon;
+using Microsoft.Data.SqlClient;
 
 namespace HxcApi.Utility;
 
