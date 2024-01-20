@@ -4,12 +4,14 @@ namespace HxcApiClient.Http;
 
 internal abstract class BaseClient
 {
-    protected async Task<HxcHttpResponse<T>> HandleResponse<T>(HttpResponseMessage response)
+    protected static async Task<HxcHttpResponse<T>> HandleResponse<T>(HttpResponseMessage response)
     {
-        HxcHttpResponse<T> result = new HxcHttpResponse<T>();
-        result.StatusCode = response.StatusCode;
-        result.IsSuccess = response.IsSuccessStatusCode;
-        
+        HxcHttpResponse<T> result = new HxcHttpResponse<T>
+        {
+            StatusCode = response.StatusCode,
+            IsSuccess = response.IsSuccessStatusCode
+        };
+
         if (response.IsSuccessStatusCode)
         {
             string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
