@@ -23,4 +23,12 @@ internal class TodosClient(HttpClient hxcHttpClient) : BaseClient, ITodosClient
 
         return await HandleResponse<ICollection<TodoRecord>>(response);
     }
+
+    public async Task<HxcHttpResponse<TodoRecord>> GetOrganizationTodoByIdAsync(int todoId)
+    {
+        HttpResponseMessage response = await hxcHttpClient
+            .GetAsync($"{OrganizationTodosAddress}/{todoId}").ConfigureAwait(false);
+
+        return await HandleResponse<TodoRecord>(response);
+    }
 }

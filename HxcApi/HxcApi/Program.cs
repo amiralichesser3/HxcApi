@@ -1,8 +1,11 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
+using HxcApi.DataAccess.Contracts.Todos.Queries;
+using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 
@@ -62,6 +65,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<SqlConnection>(_ => new SqlConnection(hxcConString));
 
+builder.Services.RegisterTodoQueries();
+
 var app = builder.Build();
 
 var userTodos = new Todo[]
@@ -76,18 +81,25 @@ var apiMapGroup = app.MapGroup("api/");
 var todosApi = apiMapGroup.MapGroup("user/todos");
 
 todosApi.MapGet("/", () => userTodos);
-todosApi.MapGet("/{id}", (int id) =>
+
+todosApi.MapGet("/{id:int}", (int id) =>
     userTodos.FirstOrDefault(a => a.Id == id) is { } todo
         ? Results.Ok(todo)
         : Results.NotFound());
 
 var organizationTodosApi =
     apiMapGroup.MapGroup("organization/todos").RequireAuthorization("organization");
-organizationTodosApi.MapGet("/", async(SqlConnection connection) =>
-    await connection.QueryAsync<Todo>("""
-                                      SELECT Id, Title, DueBy, IsComplete
-                                      FROM Todos;
-                                      """));
+
+organizationTodosApi.MapGet("/",
+    async([FromServices] IGetOrganizationTodosQueryHandler queryHandler) =>
+        await queryHandler.Handle(new GetOrganizationTodosQuery()));
+
+organizationTodosApi.MapGet("/{todoId:int}",
+    async([FromServices] IGetOrganizationTodosQueryHandler queryHandler, [FromRoute] int todoId) =>
+        (await queryHandler.Handle(new GetOrganizationTodosQuery
+        {
+            TodoId = todoId
+        })).Single());
 
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();

@@ -31,7 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\HxcCommon\HxcCommon.csproj" />
+      <Folder Include="DataAccess\Contracts\Common\" />
     </ItemGroup>
 
 </Project>
