@@ -7,4 +7,5 @@ public interface ITodosClient
 {
     Task<HxcHttpResponse<ICollection<TodoRecord>>> GetUserTodosAsync();
     Task<HxcHttpResponse<ICollection<TodoRecord>>> GetOrganizationTodosAsync();
+    Task<HxcHttpResponse<TodoRecord>> GetOrganizationTodoByIdAsync(int id);
 }
