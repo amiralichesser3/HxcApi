@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
-using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +64,19 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<SqlConnection>(_ => new SqlConnection(hxcConString));
 
-builder.Services.RegisterTodoQueries();
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<Program>()
+    .AddClasses(classes => classes.Where(type => type.Name.EndsWith("QueryHandler")))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime()
+);
+
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<Program>()
+    .AddClasses(classes => classes.Where(type => type.Name.EndsWith("QueryGenerator")))
+    .AsImplementedInterfaces()
+    .WithSingletonLifetime()
+);
 
 var app = builder.Build();
 
