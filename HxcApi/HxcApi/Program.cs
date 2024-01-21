@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
+using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 [module:DapperAot]
 
 Environment.SetEnvironmentVariable("CORECLR_GLOBAL_INVARIANT", "1");
-
+System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 var builder = WebApplication.CreateSlimBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Development.Sensitive.json", optional: true, reloadOnChange: true); 
 builder.Configuration.AddJsonFile("appsettings.Production.Sensitive.json", optional: true, reloadOnChange: true); 
@@ -64,19 +65,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<SqlConnection>(_ => new SqlConnection(hxcConString));
 
-builder.Services.Scan(scan => scan
-    .FromAssemblyOf<Program>()
-    .AddClasses(classes => classes.Where(type => type.Name.EndsWith("QueryHandler")))
-    .AsImplementedInterfaces()
-    .WithScopedLifetime()
-);
-
-builder.Services.Scan(scan => scan
-    .FromAssemblyOf<Program>()
-    .AddClasses(classes => classes.Where(type => type.Name.EndsWith("QueryGenerator")))
-    .AsImplementedInterfaces()
-    .WithSingletonLifetime()
-);
+builder.Services.RegisterTodoServices();
 
 var app = builder.Build();
 

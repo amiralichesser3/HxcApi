@@ -8,6 +8,7 @@
         <PublishAot>true</PublishAot>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Dapper.AOT</InterceptorsPreviewNamespaces>
+        <OptimizationPreference>Speed</OptimizationPreference>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,7 +25,6 @@
       <PackageReference Include="Dapper.AOT">
         <Version>1.0.31</Version>
       </PackageReference>
-      <PackageReference Include="Scrutor" Version="4.2.2" />
     </ItemGroup>
 
     <ItemGroup>
