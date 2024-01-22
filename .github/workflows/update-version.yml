@@ -1,0 +1,45 @@
+name: Auto-Increment Version
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v7
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Determine version increment
+      id: version
+      run: echo "::set-output name=increment::$(if [ ${{ github.event_name }} == 'push' ] && [ ${{ github.ref == 'refs/heads/develop' }} ]; then echo 'minor'; elif [ ${{ github.event_name }} == 'push' ] && [ ${{ github.ref == 'refs/heads/main' }} ]; then echo 'major'; fi)"
+
+    - name: Increment version
+      run: |
+        if [ "${{ steps.version.outputs.increment }}" == "minor" ]; then
+          echo "Incrementing minor version..."
+          # Implement logic to increment minor version (e.g., using a script or a tool)
+        elif [ "${{ steps.version.outputs.increment }}" == "major" ]; then
+          echo "Incrementing major version..."
+          # Implement logic to increment major version (e.g., using a script or a tool)
+        else
+          echo "No version increment needed."
+        fi
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build
+
+    - name: Publish
+      run: dotnet publish --configuration Release --no-build
