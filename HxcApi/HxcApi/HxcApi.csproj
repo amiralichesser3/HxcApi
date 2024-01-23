@@ -9,6 +9,7 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Dapper.AOT</InterceptorsPreviewNamespaces>
         <OptimizationPreference>Speed</OptimizationPreference>
+        <Version>0.3.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

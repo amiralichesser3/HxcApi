@@ -400,3 +400,5 @@ FodyWeavers.xsd
 
 # Sensitive data
 *.Sensitive.json
+
+actions-runner/

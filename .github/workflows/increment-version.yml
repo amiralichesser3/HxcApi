@@ -16,32 +16,48 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.0'  # or '5.x' if your project targets .NET 5 or later
+          dotnet-version: '8.0'
 
-      - name: Get current version
+      - name: Check if workflow triggered
+        shell: pwsh
+        run: |
+          $commitMessage = git log -1 --pretty=%B
+          if ($commitMessage -match "\[skip ci\]") {
+            Write-Host "Skipping workflow execution from the workflow run itself."
+            return
+          }
+
+      - name: Get App Version, Increment version, Update version in files
         id: get_version
-        run: echo "::set-output name=version::$(dotnet --version)"
-
-      - name: Increment version
-        id: increment_version
         run: |
-          # Assuming you're using Semantic Versioning (Major.Minor.Patch)
-          $currentVersion = "${{ steps.get_version.outputs.version }}"
-          $versionParts = $currentVersion -split '\.'
-          $newVersion = "$($versionParts[0]).$($versionParts[1] + 1).$($versionParts[2])"
-          echo "##vso[task.setvariable variable=new_version;isOutput=true]$newVersion"
+          $csprojPath = "D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj"
+          $csprojContent = Get-Content $csprojPath -Raw
+          $versionPattern = '<Version>(.*?)<\/Version>'
+          $appVersion = [regex]::Match($csprojContent, $versionPattern).Groups[1].Value
+          $versionParts = $appVersion -split '\.'
+          $minorVersionNumber = [int]($versionParts[1])
+          $minorVersionNumber++
+          $newVersion = "$($versionParts[0]).$($minorVersionNumber).$($versionParts[2])"
+          $filePath = 'D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj'
+          $content = Get-Content $filePath
+          $newVersionWithTags = "<Version>$newVersion</Version>"
+          $foundFirstOccurrence = $false
+          
+          $newContent = $content | ForEach-Object {
+              if ($_ -match '(<Version>.*?</Version>)' -and !$foundFirstOccurrence) {
+                  $foundFirstOccurrence = $true
+                  $_ -replace '(<Version>.*?</Version>)', $newVersionWithTags
+              } else {
+                  $_
+              }
+          }
 
-      - name: Update version in files
-        run: |
-          # Update version in your project files (e.g., csproj, package.json)
-          (Get-Content D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj) -replace '<Version>.*<\/Version>', "<Version>${{ steps.increment_version.outputs.new_version }}</Version>" | Set-Content  D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj
-
-
-      - name: Commit version increment
-        run: |
-          git add  D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj
-          git commit -m "Increment version to ${{ steps.increment_version.outputs.new_version }}"
-
-      - name: Push changes
-        run: |
-          git push origin develop
+          $newContent | Set-Content $filePath
+          
+          git tag -a no-increment -m "Tagging commit without version increment"
+          git add .
+          git commit -m "[skip ci] Increment version to $newVersion"
+          git fetch
+          git rebase origin/develop
+          git push origin develop -f
+        working-directory: D:\git\HxcApi
