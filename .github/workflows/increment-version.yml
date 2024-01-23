@@ -26,19 +26,20 @@ jobs:
         id: increment_version
         run: |
           # Assuming you're using Semantic Versioning (Major.Minor.Patch)
-          current_version="${{ steps.get_version.outputs.version }}"
-          new_version=$(echo $current_version | awk -F. '{print $1"."$2"."$3+1}')
-          echo "::set-output name=new_version::$new_version"
+          $currentVersion = "${{ steps.get_version.outputs.version }}"
+          $versionParts = $currentVersion -split '\.'
+          $newVersion = "$($versionParts[0]).$($versionParts[1] + 1).$($versionParts[2])"
+          echo "##vso[task.setvariable variable=new_version;isOutput=true]$newVersion"
 
       - name: Update version in files
         run: |
           # Update version in your project files (e.g., csproj, package.json)
-          (Get-Content HxcApi/HxcApi/HxcApi.csproj) -replace '<Version>.*<\/Version>', "<Version>${{ steps.increment_version.outputs.new_version }}</Version>" | Set-Content HxcApi/HxcApi/HxcApi.csproj
+          (Get-Content D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj) -replace '<Version>.*<\/Version>', "<Version>${{ steps.increment_version.outputs.new_version }}</Version>" | Set-Content  D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj
 
 
       - name: Commit version increment
         run: |
-          git add HxcApi/HxcApi/HxcApi.csproj
+          git add  D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj
           git commit -m "Increment version to ${{ steps.increment_version.outputs.new_version }}"
 
       - name: Push changes
