@@ -1,0 +1,46 @@
+name: Increment Version on Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  increment-version:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0'  # or '5.x' if your project targets .NET 5 or later
+
+      - name: Get current version
+        id: get_version
+        run: echo "::set-output name=version::$(dotnet --version)"
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          # Assuming you're using Semantic Versioning (Major.Minor.Patch)
+          current_version="${{ steps.get_version.outputs.version }}"
+          new_version=$(echo $current_version | awk -F. '{print $1"."$2"."$3+1}')
+          echo "::set-output name=new_version::$new_version"
+
+      - name: Update version in files
+        run: |
+          # Update version in your project files (e.g., csproj, package.json)
+          (Get-Content HxcApi/HxcApi/HxcApi.csproj) -replace '<Version>.*<\/Version>', "<Version>${{ steps.increment_version.outputs.new_version }}</Version>" | Set-Content HxcApi/HxcApi/HxcApi.csproj
+
+
+      - name: Commit version increment
+        run: |
+          git add HxcApi/HxcApi/HxcApi.csproj
+          git commit -m "Increment version to ${{ steps.increment_version.outputs.new_version }}"
+
+      - name: Push changes
+        run: |
+          git push origin develop
