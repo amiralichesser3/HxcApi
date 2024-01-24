@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HxcCommon", "..\HxcCommon\H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HxcApiJit", "..\HxcApiJit\HxcApiJit.csproj", "{9105EF10-DF8F-453E-B3FB-DD4C8E4A0717}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HxcApi.UnitTests", "..\Tests\HxcApi.UnitTests\HxcApi.UnitTests.csproj", "{B1EF0608-0454-4BD7-AB42-58B6BB0A595C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{9105EF10-DF8F-453E-B3FB-DD4C8E4A0717}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9105EF10-DF8F-453E-B3FB-DD4C8E4A0717}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9105EF10-DF8F-453E-B3FB-DD4C8E4A0717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1EF0608-0454-4BD7-AB42-58B6BB0A595C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1EF0608-0454-4BD7-AB42-58B6BB0A595C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1EF0608-0454-4BD7-AB42-58B6BB0A595C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1EF0608-0454-4BD7-AB42-58B6BB0A595C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
