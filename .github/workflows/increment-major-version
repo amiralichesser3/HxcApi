@@ -1,0 +1,63 @@
+name: Increment Version on Develop
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  increment-version:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0'
+
+      - name: Check if workflow triggered
+        shell: pwsh
+        run: |
+          $commitMessage = git log -1 --pretty=%B
+          if ($commitMessage -match "\[skip ci\]") {
+            Write-Host "Skipping workflow execution from the workflow run itself."
+            return
+          }
+
+      - name: Get App Version, Increment version, Update version in files
+        id: get_version
+        run: |
+          $csprojPath = "D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj"
+          $csprojContent = Get-Content $csprojPath -Raw
+          $versionPattern = '<Version>(.*?)<\/Version>'
+          $appVersion = [regex]::Match($csprojContent, $versionPattern).Groups[1].Value
+          $versionParts = $appVersion -split '\.'
+          $majorVersionNumber = [int]($versionParts[0])
+          $majorVersionNumber++
+          $newVersion = "$($majorVersionNumber).$($versionParts[1]).$($versionParts[2])"
+          $filePath = 'D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj'
+          $content = Get-Content $filePath
+          $newVersionWithTags = "<Version>$newVersion</Version>"
+          $foundFirstOccurrence = $false
+          
+          $newContent = $content | ForEach-Object {
+              if ($_ -match '(<Version>.*?</Version>)' -and !$foundFirstOccurrence) {
+                  $foundFirstOccurrence = $true
+                  $_ -replace '(<Version>.*?</Version>)', $newVersionWithTags
+              } else {
+                  $_
+              }
+          }
+
+          $newContent | Set-Content $filePath
+          
+          git tag -a no-increment -m "Tagging commit without version increment"
+          git add .
+          git commit -m "[skip ci] Increment version to $newVersion"
+          git fetch
+          git rebase origin/main
+          git push origin main -f
+        working-directory: D:\git\HxcApi
