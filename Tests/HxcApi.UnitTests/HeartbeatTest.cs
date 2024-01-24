@@ -12,6 +12,6 @@ public class HeartbeatTest
     [TestMethod]
     public void AssertOneIsTwo()
     {
-        Assert.AreEqual(1, 2);
+        Assert.AreEqual(1, 3);
     }
 }
