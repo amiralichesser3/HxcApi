@@ -25,7 +25,7 @@ jobs:
       - name: Get App Version, Increment version, Update version in files
         id: get_version
         run: |
-        
+          git checkout develop
           git fetch
           git rebase origin/develop
           $csprojPath = "D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj"
