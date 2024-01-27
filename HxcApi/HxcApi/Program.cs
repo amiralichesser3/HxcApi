@@ -1,18 +1,23 @@
+using System.Globalization;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
 using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
+using HxcApi.ExceptionHandling.Serilog;
+using HxcApi.ExceptionHandling.Todo;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 [module:DapperAot]
 
 Environment.SetEnvironmentVariable("CORECLR_GLOBAL_INVARIANT", "1");
-System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 var builder = WebApplication.CreateSlimBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Development.Sensitive.json", optional: true, reloadOnChange: true); 
 builder.Configuration.AddJsonFile("appsettings.Production.Sensitive.json", optional: true, reloadOnChange: true); 
@@ -24,6 +29,17 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 string authority = builder.Configuration["Auth0:Domain"]!;
 string audience = builder.Configuration["Auth0:Audience"]!;
 string hxcConString = builder.Configuration["ConnectionStrings:HxcDb"]!;
+string appVersion = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+    .InformationalVersion;
+
+LoggerConfiguration loggerConfiguration = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Console()
+    .WriteTo.Logger(lc => lc
+        .Filter.ByIncludingOnly(evt => evt.Level >= Serilog.Events.LogEventLevel.Warning)
+        .WriteTo.Sink(new HxcSerilogSink(hxcConString, appVersion[..appVersion.IndexOf('+')])));
+
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,6 +83,8 @@ builder.Services.AddScoped<SqlConnection>(_ => new SqlConnection(hxcConString));
 
 builder.Services.RegisterTodoServices();
 
+builder.Host.UseSerilog(loggerConfiguration.CreateLogger());
+
 var app = builder.Build();
 
 var userTodos = new Todo[]
@@ -81,6 +99,19 @@ var apiMapGroup = app.MapGroup("api/");
 var todosApi = apiMapGroup.MapGroup("user/todos");
 
 todosApi.MapGet("/", () => userTodos);
+
+todosApi.MapGet("/exception", () =>
+{
+    int i = 1;
+    int j = 0;
+    return i / j;
+});
+
+todosApi.MapGet("/exception2", () =>
+{
+    Guid todoExceptionId = Guid.NewGuid();
+    throw new TodoException(todoExceptionId, nameof(Program));
+});
 
 todosApi.MapGet("/{id:int}", (int id) =>
     userTodos.FirstOrDefault(a => a.Id == id) is { } todo
@@ -105,8 +136,11 @@ app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseSerilogRequestLogging();
+
 app.Run();
 
 [JsonSerializable(typeof(IEnumerable<Todo>))]
 [JsonSerializable(typeof(Todo[]))]
+[JsonSerializable(typeof(ErrorLogEvent))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext;
