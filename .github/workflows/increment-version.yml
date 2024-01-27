@@ -25,6 +25,9 @@ jobs:
       - name: Get App Version, Increment version, Update version in files
         id: get_version
         run: |
+        
+          git fetch
+          git rebase origin/develop
           $csprojPath = "D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj"
           $csprojContent = Get-Content $csprojPath -Raw
           $versionPattern = '<Version>(.*?)<\/Version>'
@@ -52,7 +55,5 @@ jobs:
           git tag -a no-increment -m "Tagging commit without version increment"
           git add .
           git commit -m "[skip ci] Increment version to $newVersion"
-          git fetch
-          git rebase origin/develop
-          git push origin develop -f
+          git push origin develop
         working-directory: D:\git\HxcApi
