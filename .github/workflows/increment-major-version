@@ -1,4 +1,4 @@
-name: Increment Version on Develop
+name: Increment Version on Main
 
 on:
   push:
@@ -13,11 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '8.0'
-
       - name: Check if workflow triggered
         shell: pwsh
         run: |
@@ -30,6 +25,9 @@ jobs:
       - name: Get App Version, Increment version, Update version in files
         id: get_version
         run: |
+          git checkout main
+          git fetch
+          git rebase origin/main
           $csprojPath = "D:\git\HxcApi\HxcApi\HxcApi\HxcApi.csproj"
           $csprojContent = Get-Content $csprojPath -Raw
           $versionPattern = '<Version>(.*?)<\/Version>'
@@ -57,7 +55,5 @@ jobs:
           git tag -a no-increment -m "Tagging commit without version increment"
           git add .
           git commit -m "[skip ci] Increment version to $newVersion"
-          git fetch
-          git rebase origin/main
-          git push origin main -f
+          git push origin main
         working-directory: D:\git\HxcApi
