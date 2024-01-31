@@ -3,10 +3,13 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
+using HxcApi.DataAccess.Contracts.Todos.Commands;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
 using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
+using HxcApi.ExceptionHandling.Middleware;
 using HxcApi.ExceptionHandling.Serilog;
 using HxcApi.ExceptionHandling.Todo;
+using HxcApi.Utility;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +31,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 string authority = builder.Configuration["Auth0:Domain"]!;
 string audience = builder.Configuration["Auth0:Audience"]!;
-string hxcConString = builder.Configuration["ConnectionStrings:HxcDb"]!;
+string readConString = builder.Configuration["ConnectionStrings:HxcDb_Read"]!;
+string writeConString = builder.Configuration["ConnectionStrings:HxcDb_Write"]!;
 string appVersion = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
     .InformationalVersion;
 
@@ -37,7 +41,7 @@ LoggerConfiguration loggerConfiguration = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(evt => evt.Level >= Serilog.Events.LogEventLevel.Warning)
-        .WriteTo.Sink(new HxcSerilogSink(hxcConString, appVersion[..appVersion.IndexOf('+')])));
+        .WriteTo.Sink(new HxcSerilogSink(writeConString, appVersion[..appVersion.IndexOf('+')])));
 
 
 builder.Services.AddAuthentication(options =>
@@ -79,7 +83,8 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-builder.Services.AddScoped<SqlConnection>(_ => new SqlConnection(hxcConString));
+builder.Services.AddKeyedScoped<SqlConnection>("ReadSqlConnection", ((provider, o) => new SqlConnection(readConString)));
+builder.Services.AddKeyedScoped<SqlConnection>("WriteSqlConnection", ((provider, o) => new SqlConnection(writeConString)));
 
 builder.Services.RegisterTodoServices();
 
@@ -132,11 +137,18 @@ organizationTodosApi.MapGet("/{todoId:int}",
             TodoId = todoId
         })).Single());
 
+organizationTodosApi.MapPost("/",
+    async ([FromServices] ICreateOrganizationTodoCommandHandler commandHandler, [FromBody] Todo todo, ClaimsPrincipal user) =>
+    {
+        todo.OrganizationId = user.GetUserId();
+        await commandHandler.HandleAsync(new CreateOrganizationTodoCommand(todo));
+    });
+
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSerilogRequestLogging();
+app.UseKnownExceptionMiddleware().UseSerilogRequestLogging();
 
 app.Run();
 

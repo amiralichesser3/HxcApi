@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HxcApiJit.Ef;
 
-public class HxcDbContext(DbContextOptions<HxcDbContext> options) : DbContext(options)
+public class HxcReadDbContext(DbContextOptions<HxcReadDbContext> options) : DbContext(options)
 {
     public DbSet<Todo> Todos { get; set; }
     public DbSet<ErrorLogEvent> ErrorLogEvents { get; set; }

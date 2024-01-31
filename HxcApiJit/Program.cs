@@ -5,10 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Development.Sensitive.json", optional: true, reloadOnChange: true); 
 builder.Configuration.AddJsonFile("appsettings.Production.Sensitive.json", optional: true, reloadOnChange: true); 
 
-string hxcConString = builder.Configuration["ConnectionStrings:HxcDb"]!;
+string readConString = builder.Configuration["ConnectionStrings:HxcDb_Read"]!;
+string writeConString = builder.Configuration["ConnectionStrings:HxcDb_Write"]!;
 builder.Services.AddRazorPages();
 
-builder.Services.AddDbContext<HxcDbContext>(options => options.UseSqlServer(hxcConString));
+builder.Services.AddDbContext<HxcReadDbContext>(options => options.UseSqlServer(readConString));
+builder.Services.AddDbContext<HxcWriteDbContext>(options => options.UseSqlServer(writeConString));
 
 
 var app = builder.Build();
