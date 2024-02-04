@@ -6,6 +6,7 @@ using Dapper;
 using HxcApi.DataAccess.Contracts.Todos.Commands;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
 using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
+using HxcApi.Events.Todo.Ioc;
 using HxcApi.ExceptionHandling.Middleware;
 using HxcApi.ExceptionHandling.Serilog;
 using HxcApi.ExceptionHandling.Todo;
@@ -87,6 +88,7 @@ builder.Services.AddKeyedScoped<SqlConnection>("ReadSqlConnection", ((provider, 
 builder.Services.AddKeyedScoped<SqlConnection>("WriteSqlConnection", ((provider, o) => new SqlConnection(writeConString)));
 
 builder.Services.RegisterTodoServices();
+builder.Services.RegisterTodoEvents();
 
 builder.Host.UseSerilog(loggerConfiguration.CreateLogger());
 

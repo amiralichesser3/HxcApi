@@ -8,7 +8,7 @@ namespace HxcApi.DataAccess.DapperImplementation.Todos.Commands;
 public class CreateOrganizationTodoCommandHandler(
     IServiceProvider serviceProvider,
     ITodosSqlQueryGenerator todosSqlQueryGenerator)
-    : CommandHandler<CreateOrganizationTodoCommand>(serviceProvider), ICreateOrganizationTodoCommandHandler
+    : EventDispatchingCommandHandler<CreateOrganizationTodoCommand>(serviceProvider), ICreateOrganizationTodoCommandHandler
 {
     protected override async Task Handle(CreateOrganizationTodoCommand command)
     {

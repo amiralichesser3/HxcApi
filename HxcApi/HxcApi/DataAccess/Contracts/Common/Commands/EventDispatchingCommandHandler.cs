@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 
 namespace HxcApi.DataAccess.Contracts.Common.Commands;
 
-public abstract class CommandHandler<T>(
+public abstract class EventDispatchingCommandHandler<T>(
     IServiceProvider serviceProvider)
     : ICommandHandler<T>
-    where T : ICommand
+    where T : ICommand, IEvent
 {
     protected readonly SqlConnection WriteSqlConnection = serviceProvider.GetKeyedService<SqlConnection>("WriteSqlConnection")!;
     private readonly ICommandValidator<T>? _validator = serviceProvider.GetService<ICommandValidator<T>>();
@@ -18,7 +18,11 @@ public abstract class CommandHandler<T>(
 
     public async Task AfterHandleAsync(T command)
     {
-        if (_eventPublisher != null) await _eventPublisher.PublishAsync(command);
+        if (_eventPublisher != null)
+        {
+            command.PublishedDateTime = DateTimeOffset.Now;
+            await _eventPublisher.PublishAsync(command);
+        }
     }
 
     public async Task HandleAsync(T command)
