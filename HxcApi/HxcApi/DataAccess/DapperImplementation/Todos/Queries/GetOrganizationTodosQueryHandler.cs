@@ -18,7 +18,6 @@ public class GetOrganizationTodosQueryHandler(IServiceProvider serviceProvider, 
             queryText = sqlQueryGenerator.GenerateSelectByIdQuery();
             return await SqlConnection.QueryAsync<Todo>(queryText, new { Id = query.TodoId.Value });
         }
-        
         queryText = sqlQueryGenerator.GenerateSelectAllQuery();
         return await SqlConnection.QueryAsync<Todo>(queryText);
     }

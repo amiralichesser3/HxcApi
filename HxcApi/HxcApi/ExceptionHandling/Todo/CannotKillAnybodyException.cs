@@ -1,6 +1,6 @@
 ﻿using HxcCommon;
 
-namespace HxcApi.DataAccess.DapperImplementation.Todos.Exceptions;
+namespace HxcApi.ExceptionHandling.Todo;
 
 public class CannotKillAnybodyException(string target) : KnownException
 {

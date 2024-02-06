@@ -6,7 +6,8 @@ using Dapper;
 using HxcApi.DataAccess.Contracts.Todos.Commands;
 using HxcApi.DataAccess.Contracts.Todos.Queries;
 using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
-using HxcApi.Events.Todo.Ioc;
+using HxcApi.DataAccess.DapperImplementation.TypeHandlers;
+using HxcApi.Events.Todos.Ioc;
 using HxcApi.ExceptionHandling.Middleware;
 using HxcApi.ExceptionHandling.Serilog;
 using HxcApi.ExceptionHandling.Todo;
@@ -90,17 +91,23 @@ builder.Services.AddKeyedScoped<SqlConnection>("WriteSqlConnection", ((provider,
 builder.Services.RegisterTodoServices();
 builder.Services.RegisterTodoEvents();
 
+builder.Services.AddSingleton<RabbitMqService>(
+    provider =>
+        new RabbitMqService("hxc_queue", provider)
+            .Receive<CreateOrganizationTodoCommand>());
+
 builder.Host.UseSerilog(loggerConfiguration.CreateLogger());
 
 var app = builder.Build();
 
+
 var userTodos = new Todo[]
 {
     new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
+    new(2, "Do the dishes", DateTime.Now),
+    new(3, "Do the laundry", DateTime.Now.AddDays(1)),
     new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
+    new(5, "Clean the car", DateTime.Now.AddDays(2))
 };
 var apiMapGroup = app.MapGroup("api/");
 var todosApi = apiMapGroup.MapGroup("user/todos");
@@ -157,4 +164,5 @@ app.Run();
 [JsonSerializable(typeof(IEnumerable<Todo>))]
 [JsonSerializable(typeof(Todo[]))]
 [JsonSerializable(typeof(ErrorLogEvent))]
+[JsonSerializable(typeof(CreateOrganizationTodoCommand))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext;

@@ -1,6 +1,6 @@
 ﻿using HxcApi.DataAccess.Contracts.Common.Commands;
 using HxcApi.DataAccess.Contracts.Todos.Commands;
-using HxcApi.DataAccess.DapperImplementation.Todos.Exceptions;
+using HxcApi.ExceptionHandling.Todo;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HxcApi.DataAccess.DapperImplementation.Todos.Commands;

@@ -1,9 +1,9 @@
 ﻿using HxcApi.DataAccess.Contracts.Common.Events;
 using HxcApi.DataAccess.Contracts.Todos.Commands;
-using HxcApi.Events.Todo.EventHandlers;
-using HxcApi.Events.Todo.EventPublishers;
+using HxcApi.Events.Todos.EventHandlers;
+using HxcApi.Events.Todos.EventPublishers;
 
-namespace HxcApi.Events.Todo.Ioc;
+namespace HxcApi.Events.Todos.Ioc;
 
 public static class TodosEventsIocHelper
 {
