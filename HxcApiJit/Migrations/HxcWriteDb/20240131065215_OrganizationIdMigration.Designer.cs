@@ -4,16 +4,19 @@ using HxcApiJit.Ef;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HxcApiJit.Migrations
+namespace HxcApiJit.Migrations.HxcWriteDb
 {
-    [DbContext(typeof(HxcDbContext))]
-    partial class HxcDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(HxcWriteDbContext))]
+    [Migration("20240131065215_OrganizationIdMigration")]
+    partial class OrganizationIdMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,6 +85,9 @@ namespace HxcApiJit.Migrations
 
                     b.Property<bool>("IsComplete")
                         .HasColumnType("bit");
+
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");

@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="CopySqlFilesToOutputDirectory" Version="1.0.0" />
       <PackageReference Include="Dapper" Version="2.1.28" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
       <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
@@ -26,16 +27,14 @@
       <PackageReference Include="Dapper.AOT">
         <Version>1.0.31</Version>
       </PackageReference>
+      <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+      <PackageReference Include="YeSql.Net" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\HxcCommon\HxcCommon.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="DataAccess\Contracts\Common\" />
     </ItemGroup>
 
 </Project>

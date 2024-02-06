@@ -1,3 +1,4 @@
 ﻿namespace HxcApi.DataAccess.Contracts.Common.Queries;
 
-public interface IQuery<T>;
+public interface IQuery;
+public interface IQuery<T> : IQuery;

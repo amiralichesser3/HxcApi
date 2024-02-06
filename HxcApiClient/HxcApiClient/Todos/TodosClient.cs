@@ -1,5 +1,6 @@
-﻿using HxcApiClient.Http;
-using HxcApiClient.Records;
+﻿using System.Net.Http.Json;
+using HxcApiClient.Http;
+using HxcApiClient.Todos.Records;
 
 namespace HxcApiClient.Todos;
 
@@ -28,6 +29,15 @@ internal class TodosClient(HttpClient hxcHttpClient) : BaseClient, ITodosClient
     {
         HttpResponseMessage response = await hxcHttpClient
             .GetAsync($"{OrganizationTodosAddress}/{todoId}").ConfigureAwait(false);
+
+        return await HandleResponse<TodoRecord>(response);
+    }
+
+    public async Task<HxcHttpResponse> CreateOrganizationTodoAsync(TodoRecord todo)
+    {
+        HttpContent content = JsonContent.Create(todo);
+        HttpResponseMessage response = await hxcHttpClient
+            .PostAsync($"{OrganizationTodosAddress}", content).ConfigureAwait(false);
 
         return await HandleResponse<TodoRecord>(response);
     }

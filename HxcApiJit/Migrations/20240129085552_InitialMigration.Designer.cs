@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HxcApiJit.Migrations
 {
-    [DbContext(typeof(HxcDbContext))]
-    [Migration("20240127092620_ErrorLogEventsMigration")]
-    partial class ErrorLogEventsMigration
+    [DbContext(typeof(HxcReadDbContext))]
+    [Migration("20240129085552_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
