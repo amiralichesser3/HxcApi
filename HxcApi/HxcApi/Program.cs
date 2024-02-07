@@ -3,15 +3,15 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Dapper;
-using HxcApi.DataAccess.Contracts.Todos.Commands;
-using HxcApi.DataAccess.Contracts.Todos.Queries;
-using HxcApi.DataAccess.DapperImplementation.Todos.Ioc;
-using HxcApi.DataAccess.DapperImplementation.TypeHandlers;
-using HxcApi.Events.Todos.Ioc;
+using HxcApi;
 using HxcApi.ExceptionHandling.Middleware;
-using HxcApi.ExceptionHandling.Serilog;
-using HxcApi.ExceptionHandling.Todo;
-using HxcApi.Utility;
+using HxcApi.Logging.Serilog;
+using HxcApi.Todos.Contracts.Commands;
+using HxcApi.Todos.Contracts.Queries;
+using HxcApi.Todos.Events.Ioc;
+using HxcApi.Todos.Exceptions;
+using HxcApi.Todos.Persistence.Ioc;
+using HxcApi.Utility.Extensions;
 using HxcCommon;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -161,8 +161,11 @@ app.UseKnownExceptionMiddleware().UseSerilogRequestLogging();
 
 app.Run();
 
-[JsonSerializable(typeof(IEnumerable<Todo>))]
-[JsonSerializable(typeof(Todo[]))]
-[JsonSerializable(typeof(ErrorLogEvent))]
-[JsonSerializable(typeof(CreateOrganizationTodoCommand))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext;
+namespace HxcApi
+{
+    [JsonSerializable(typeof(IEnumerable<Todo>))]
+    [JsonSerializable(typeof(Todo[]))]
+    [JsonSerializable(typeof(ErrorLogEvent))]
+    [JsonSerializable(typeof(CreateOrganizationTodoCommand))]
+    internal partial class AppJsonSerializerContext : JsonSerializerContext;
+}

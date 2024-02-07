@@ -9,7 +9,7 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Dapper.AOT</InterceptorsPreviewNamespaces>
         <OptimizationPreference>Speed</OptimizationPreference>
-        <Version>0.10.1</Version>
+        <Version>0.0.2</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,6 +35,15 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\HxcCommon\HxcCommon.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Logging\" />
+      <Folder Include="Monitoring\" />
+      <Folder Include="Todos\Contracts\" />
+      <Folder Include="Todos\Events\" />
+      <Folder Include="Todos\Persistence\Commands\" />
+      <Folder Include="Todos\Persistence\Queries\" />
     </ItemGroup>
 
 </Project>
